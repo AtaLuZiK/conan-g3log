@@ -1,0 +1,130 @@
+diff --git logrotate/CMakeLists.txt logrotate/CMakeLists.txt
+index 5110a37..821f662 100644
+--- logrotate/CMakeLists.txt
++++ logrotate/CMakeLists.txt
+@@ -3,18 +3,10 @@
+ #  2015, April 30, @author Kjell.Hedstrom
+ # =====================================================
+ 
+-CMAKE_MINIMUM_REQUIRED (VERSION 3.1)
+-ENABLE_LANGUAGE(CXX)
+-SET(CMAKE_BUILD_TYPE Release)
++SET(PROJECT_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src)
++SET(DIR_UNIT_TEST ${CMAKE_CURRENT_SOURCE_DIR}/test)
++SET(DIR_3RDPARTY ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty)
+ 
+-PROJECT (LogRotate)
+-SET(PROJECT_SRC ${LogRotate_SOURCE_DIR}/src)
+-SET(DIR_UNIT_TEST ${LogRotate_SOURCE_DIR}/test)
+-SET(DIR_3RDPARTY ${LogRotate_SOURCE_DIR}/../3rdparty)
+-
+-
+-MESSAGE(" PROJECT_SRC = : ${PROJECT_SRC}")
+-INCLUDE_DIRECTORIES(${PROJECT_SRC})
+ SET(ACTIVE_CPP0xx_DIR "Release")
+ 
+ 
+@@ -48,40 +40,11 @@ SET(CMAKE_INSTALL_LIBDIR lib CACHE PATH "Output dir for libraries")
+ SET(CMAKE_INSTALL_HEADERDIR include CACHE PATH "Output dir for headers")
+ SET(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
+ 
+-IF (${CPACK_INSTALL_PREFIX}.x STREQUAL ".")
+-   SET(CPACK_INSTALL_PREFIX "/usr/local")
+-   MESSAGE("CPACK_INSTALL_PREFIX: " ${CPACK_INSTALL_PREFIX})
+-ENDIF()
+-
+-
+-
+-
+-
+-# Load PATHS
+-INCLUDE (${LogRotate_SOURCE_DIR}/Options.cmake)
+-
+-#
+-# Find all libraries
+-#
+-
+- IF (${CMAKE_PREFIX_PATH}.x STREQUAL ".x")
+-    SET(CMAKE_PREFIX_PATH /usr/local)
+-    MESSAGE("CMAKE_PREFIX_PATH: " ${CMAKE_PREFIX_PATH})
+- ENDIF()
+-
+-
+-find_library(G3LOG_LIBRARY g3logger PATHS /usr/local/probe/lib )
+-include_directories(${CMAKE_PREFIX_PATH}/include)
+-
+-
+-find_library(BOOST_FILESYSTEM boost_filesystem PATHS /usr/local/probe/lib ${BOOST_ROOT})
+-set(Boost_LIBRARIES ${BOOST_FILESYSTEM})
+-
+-find_library(BOOST_SYSTEM boost_system PATHS /usr/local/probe/lib ${BOOST_ROOT} )
+-list(APPEND Boost_LIBRARIES ${BOOST_SYSTEM})
++set(Boost_LIBRARIES ${CONAN_LIBS_BOOST})
++set(Boost_INCLUDE_DIRS ${CONAN_INCLUDE_DIRS_BOOST})
+ include_directories(${Boost_INCLUDE_DIRS})
+ 
+-MESSAGE(" boost root: " ${BOOST_ROOT})
++MESSAGE(" boost root: " ${Boost_INCLUDE_DIRS})
+ MESSAGE(" boost include : " ${Boost_INCLUDE_DIRS})
+ MESSAGE("BOOST LIBRARIES: ${Boost_LIBRARIES}")
+ 
+@@ -89,15 +52,11 @@ MESSAGE("BOOST LIBRARIES: ${Boost_LIBRARIES}")
+ find_package( ZLIB REQUIRED )
+ include_directories( ${ZLIB_INCLUDE_DIRS} )
+ 
+-
+-
+-
+-
+ #
+ # Build
+ #
+ # GENERIC STEPS
+-FILE(GLOB SRC_FILES ${PROJECT_SRC}/*.h ${PROJECT_SRC}/*.h ${PROJECT_SRC}/*.ipp ${PROJECT_SRC}/*.cpp) 
++FILE(GLOB SRC_FILES ${PROJECT_SRC}/*.h ${PROJECT_SRC}/*.h ${PROJECT_SRC}/*.ipp ${PROJECT_SRC}/*.cpp)
+ 
+ 
+ IF ("${CMAKE_CXX_COMPILER_ID}" MATCHES ".*Clang")
+@@ -124,21 +83,12 @@ ENDIF()
+ 
+ 
+ #
+-# Setup Library 
++# Setup Library
+ #
+ SET(LIBRARY_TO_BUILD g3logrotate)
+ INCLUDE_DIRECTORIES(${PROJECT_SRC})
+ 
+-# see Options.cmake
+-IF(BUILD_STATIC)
+-   ADD_LIBRARY(${LIBRARY_TO_BUILD} ${SRC_FILES})
+-ELSE()
+-   IF(NOT(CMAKE_VERSION LESS 3.4) AND MSVC)
+-      set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+-   ENDIF()
+-   ADD_LIBRARY(${LIBRARY_TO_BUILD} SHARED ${SRC_FILES})
+-ENDIF()
+-
++ADD_LIBRARY(${LIBRARY_TO_BUILD} STATIC ${SRC_FILES})
+ 
+ SET(${LIBRARY_TO_BUILD}_VERSION_STRING ${VERSION})
+ SET_TARGET_PROPERTIES(${LIBRARY_TO_BUILD} PROPERTIES LINKER_LANGUAGE CXX)
+@@ -148,18 +98,3 @@ SET_TARGET_PROPERTIES(${LIBRARY_TO_BUILD} PROPERTIES LINKER_LANGUAGE CXX SOVERSI
+ MESSAGE("Libraries, g3log: ${g3logger}")
+ MESSAGE("Libraries, boost: ${Boost_LIBRARIES}")
+ MESSAGE("Libraries, zlib: ${ZLIB_LIBRARIES}")
+-
+-#
+-# Setup unit tests
+-#
+-INCLUDE (${LogRotate_SOURCE_DIR}/test/Test.cmake)
+-
+-
+-#
+-# make package or make install
+-#
+-IF( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+-   FILE(GLOB HEADER_FILES ${PROJECT_SRC}/g3sinks/*.h)
+-   INCLUDE (${LogRotate_SOURCE_DIR}/CPackLists.txt)
+-ENDIF()
+-

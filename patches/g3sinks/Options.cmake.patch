@@ -1,0 +1,14 @@
+diff --git logrotate/Options.cmake logrotate/Options.cmake
+index 4532b34..e94bdfd 100644
+--- logrotate/Options.cmake
++++ logrotate/Options.cmake
+@@ -8,7 +8,8 @@
+ # use SHARED g3log library or STATIC g3log library
+ #
+ # example: cmake -DBUILD_STATIC=ON .. 
+-option (BUILD_STATIC "Building g3logrotate as static library. Linking with static g3log library" OFF)
++option (BUILD_STATIC "Building g3logrotate as static library. Linking with static g3log library" ON)
++
+ IF (BUILD_STATIC) 
+ 
+   IF (MSVC)

@@ -1,0 +1,89 @@
+diff --git CMakeLists.txt CMakeLists.txt
+index a219e02..bb7337f 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -21,10 +21,10 @@
+ # 3. cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio XXX" ..
+ #     (cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 12")
+ #     MAKE SURE you check the CMake documentation so you are using
+-#     the correct bit flags(64 bit etc). The "XXX" needs 
++#     the correct bit flags(64 bit etc). The "XXX" needs
+ #     tto be replaced for your specific build system, ref: cmake docs.
+-# 
+-#     (Example from Appveyor Ci: 
++#
++#     (Example from Appveyor Ci:
+ #      https://github.com/KjellKod/g3log/blob/master/appveyor.yml
+ #      cmake -G "Visual Studio 14 2015 Win64" -DADD_G3LOG_UNIT_TEST=ON ..)
+ #
+@@ -56,6 +56,10 @@
+ cmake_minimum_required (VERSION 3.1)
+ ENABLE_LANGUAGE(CXX)
+ 
++set(CMAKE_CXX_STANDARD 14)
++set(CMAKE_CXX_STANDARD_REQUIRED ON)
++set(CMAKE_CXX_EXTENSIONS OFF)
++
+ if(NOT CMAKE_BUILD_TYPE AND NOT (MSVC_IDE OR XCODE))
+   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type, one of: Release, Debug" FORCE)
+ endif()
+@@ -63,6 +67,9 @@ endif()
+ 
+ project (g3log)
+ 
++include(${BUILD_ROOT_DIR}/conanbuildinfo.cmake)
++conan_basic_setup()
++
+ message( STATUS "Build type: ${CMAKE_BUILD_TYPE}" )
+ message( STATUS "Configuration types: ${CMAKE_CONFIGURATION_TYPES}" )
+ 
+@@ -142,31 +149,6 @@ message( STATUS "Software Version: ${VERSION}" )
+ 
+ 
+ 
+-   # ============================================================================
+-   # EXAMPLE OPTIONS: By defauls is ON. This will create 'g3log-FATAL-* examples'
+-   # ============================================================================
+-   # DISABLE WITH:  -DADD_FATAL_EXAMPLE=OFF
+-   INCLUDE (${g3log_SOURCE_DIR}/example/Example.cmake)
+-
+-
+-
+-   # ============================================================================
+-   # PERFORMANCE TEST OPTIONS: Performance operations for g3log
+-   # ============================================================================
+-   # ENABLE WITH:  -DADD_G3LOG_PERFORMANCE=ON
+-   INCLUDE (${g3log_SOURCE_DIR}/test_performance/Performance.cmake)
+-
+-
+-
+-   # ==========================================================================
+-   # UNIT TEST OPTIONS:
+-   # ============================================================================
+-   # ENABLE WITH:  -DADD_G3LOG_UNIT_TEST=ON
+-   INCLUDE (${g3log_SOURCE_DIR}/test_unit/Test.cmake)
+-
+-
+-
+-
+ IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    # ==========================================================================
+    #        Only tested on Ubuntu, CentOS and OSX.
+@@ -193,7 +175,7 @@ IF(MINGW)
+    #
+    # ==========================================================================
+    INCLUDE (${g3log_SOURCE_DIR}/CPackLists.txt)
+-   
++
+    # this enables strerror_s
+    ADD_DEFINITIONS(-DMINGW_HAS_SECURE_API)
+ ENDIF()
+@@ -211,7 +193,4 @@ IF (NOT MSVC)
+    )
+ ENDIF()
+ 
+-
+-
+-
+-
++add_subdirectory(g3sinks/logrotate)
